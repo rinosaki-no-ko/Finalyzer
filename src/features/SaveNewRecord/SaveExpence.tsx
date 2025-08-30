@@ -15,7 +15,7 @@ const SaveExpence = () => {
     description: "",
     account: "",
     member: "",
-    uuid: "",
+    uuid: crypto.randomUUID(),
   } as Expence);
   const [date, setDate] = useState({
     year: new Date().getFullYear(),
@@ -36,7 +36,11 @@ const SaveExpence = () => {
   }, [date]);
 
   const save = async () => {
-    setForm({ ...form, uuid: crypto.randomUUID() });
+    if (!isDateValid || Object.values(form).includes("") || form.amount <= 0) {
+      console.error("invalid input");
+      return;
+    }
+    setForm({ ...form, uuid: crypto.randomUUID() }); // uuid付けるのはrustにお願いしていいのでは？
     console.log(await invoke(`save_expence`, { expence: form }));
   };
 

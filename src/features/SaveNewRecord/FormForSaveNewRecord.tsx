@@ -1,22 +1,55 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Expence } from "../../utils/dataTypes";
+import { Expence, Income, Transfer } from "../../utils/dataTypes";
 import { useEffect, useState } from "react";
 import isValidDate from "../../utils/isValidDate";
-const SaveExpence = () => {
+
+type SaveType = "expence" | "income" | "transfer";
+const FormForSaveNewRecord = ({ saveType }: { saveType: SaveType }) => {
   /*
    *****************************************************
    *変数宣言
    *****************************************************
    */
-  const [form, setForm] = useState({
-    date: "",
-    category: "",
-    amount: 0,
-    description: "",
-    account: "",
-    member: "",
-    uuid: crypto.randomUUID(),
-  } as Expence);
+
+  let initForm: Expence | Income | Transfer;
+  if (saveType === "expence") {
+    initForm = {
+      date: "",
+      category: "",
+      amount: 0,
+      description: "",
+      account: "",
+      member: "",
+      uuid: crypto.randomUUID(),
+    } as Expence;
+  } else if (saveType === "income") {
+    initForm = {
+      date: "",
+      category: "",
+      amount: 0,
+      description: "",
+      account: "",
+      member: "",
+      uuid: crypto.randomUUID(),
+      savetype: saveType,
+    } as Income;
+  } else {
+    initForm = {
+      date: "",
+      from_account: "",
+      to_account: "",
+      from_amount: 0,
+      to_amount: 0,
+      description: "",
+      uuid: crypto.randomUUID(),
+    } as Transfer;
+  }
+  const [form, setForm] = useState(initForm);
+
+  useEffect(() => {
+    setForm(initForm);
+  }, [saveType]);
+
   const [date, setDate] = useState({
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
@@ -36,9 +69,15 @@ const SaveExpence = () => {
   }, [date]);
 
   const save = async () => {
-    if (!isDateValid || Object.values(form).includes("") || form.amount <= 0) {
+    if (!isDateValid || Object.values(form).includes("")) {
       console.error("invalid input");
       return;
+    }
+    if ("amount" in form) {
+      if (form.amount <= 0) {
+        console.error("invalid input");
+        return;
+      }
     }
     setForm({ ...form, uuid: crypto.randomUUID() }); // uuid付けるのはrustにお願いしていいのでは？
     console.log(await invoke(`save_expence`, { expence: form }));
@@ -94,7 +133,7 @@ const SaveExpence = () => {
    */
   return (
     <>
-      <h2>支出</h2>
+      <h2>{saveType}</h2>
       <form>
         {createDateForm()}
         {Object.entries(form).map(([key, value]) => {
@@ -129,4 +168,4 @@ const SaveExpence = () => {
     </>
   );
 };
-export default SaveExpence;
+export default FormForSaveNewRecord;

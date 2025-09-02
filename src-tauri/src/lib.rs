@@ -8,6 +8,7 @@ pub fn run() {
             library::save_new_records::save_expence,
             library::save_new_records::save_income,
             library::save_new_records::save_transfer,
+            library::get_records::get_records,
             library::utils::get_app_version,
         ])
         .run(tauri::generate_context!())

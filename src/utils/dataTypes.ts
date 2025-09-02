@@ -1,5 +1,5 @@
 interface Expence {
-  date: string;
+  date: number;
   category: string;
   amount: number;
   description: string;
@@ -9,7 +9,7 @@ interface Expence {
 }
 
 interface Income {
-  date: string;
+  date: number;
   category: string;
   amount: number;
   description: string;
@@ -19,7 +19,7 @@ interface Income {
 }
 
 interface Transfer {
-  date: string;
+  date: number;
   from_account: string;
   to_account: string;
   amount: number;

@@ -21,7 +21,7 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
   let initForm: Expence | Income | Transfer;
   if (saveType === "expence") {
     initForm = {
-      date: `${date.year}-${date.month}-${date.day}`,
+      date: date.year * 10000 + date.month * 100 + date.day,
       category: "",
       amount: 0,
       description: "",
@@ -31,7 +31,7 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
     } as Expence;
   } else if (saveType === "income") {
     initForm = {
-      date: `${date.year}-${date.month}-${date.day}`,
+      date: date.year * 10000 + date.month * 100 + date.day,
       category: "",
       amount: 0,
       description: "",
@@ -41,7 +41,7 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
     } as Income;
   } else {
     initForm = {
-      date: `${date.year}-${date.month}-${date.day}`,
+      date: date.year * 10000 + date.month * 100 + date.day,
       from_account: "",
       to_account: "",
       amount: 0,
@@ -58,7 +58,10 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
 
   useEffect(() => {
     setIsDateValid(isValidDate(date));
-    setForm({ ...form, date: `${date.year}-${date.month}-${date.day}` });
+    setForm({
+      ...form,
+      date: date.year * 10000 + date.month * 100 + date.day,
+    });
   }, [date]);
   /*
    ****************************************************
@@ -130,9 +133,7 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
             onChange={chanveDate}
           />
         </label>
-        <p>
-          value:{date.year}-{date.month}-{date.day}
-        </p>
+        <p>value:{date.year * 10000 + date.month * 100 + date.day}</p>
         <p>{String(isDateValid)}</p>
         {isDateValid || <p>無効な日付です</p>}
       </div>

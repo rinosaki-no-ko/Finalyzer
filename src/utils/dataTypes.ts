@@ -22,8 +22,8 @@ interface Transfer {
   date: string;
   from_account: string;
   to_account: string;
-  from_amount: number;
-  to_amount: number;
+  amount: number;
+  commission: number;
   description: string;
   uuid: string;
 }

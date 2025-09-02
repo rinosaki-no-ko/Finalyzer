@@ -11,10 +11,17 @@ const FormForSaveNewRecord = ({ saveType }: { saveType: SaveType }) => {
    *****************************************************
    */
 
+  const [date, setDate] = useState({
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1,
+    day: new Date().getDate(),
+  });
+  const [isDateValid, setIsDateValid] = useState(true);
+
   let initForm: Expence | Income | Transfer;
   if (saveType === "expence") {
     initForm = {
-      date: "",
+      date: `${date.year}-${date.month}-${date.day}`,
       category: "",
       amount: 0,
       description: "",
@@ -24,22 +31,21 @@ const FormForSaveNewRecord = ({ saveType }: { saveType: SaveType }) => {
     } as Expence;
   } else if (saveType === "income") {
     initForm = {
-      date: "",
+      date: `${date.year}-${date.month}-${date.day}`,
       category: "",
       amount: 0,
       description: "",
       account: "",
       member: "",
       uuid: crypto.randomUUID(),
-      savetype: saveType,
     } as Income;
   } else {
     initForm = {
-      date: "",
+      date: `${date.year}-${date.month}-${date.day}`,
       from_account: "",
       to_account: "",
-      from_amount: 0,
-      to_amount: 0,
+      amount: 0,
+      commission: 0,
       description: "",
       uuid: crypto.randomUUID(),
     } as Transfer;
@@ -50,37 +56,42 @@ const FormForSaveNewRecord = ({ saveType }: { saveType: SaveType }) => {
     setForm(initForm);
   }, [saveType]);
 
-  const [date, setDate] = useState({
-    year: new Date().getFullYear(),
-    month: new Date().getMonth() + 1,
-    day: new Date().getDate(),
-  });
-  const [isDateValid, setIsDateValid] = useState(true);
-
+  useEffect(() => {
+    setIsDateValid(isValidDate(date));
+    setForm({ ...form, date: `${date.year}-${date.month}-${date.day}` });
+  }, [date]);
   /*
    ****************************************************
    * 処理定義
    ****************************************************
    */
 
-  useEffect(() => {
-    setIsDateValid(isValidDate(date));
-    setForm({ ...form, date: `${date.year}-${date.month}-${date.day}` });
-  }, [date]);
-
   const save = async () => {
-    if (!isDateValid || Object.values(form).includes("")) {
-      console.error("invalid input");
+    if (Object.values(form).includes("")) {
+      Object.entries(form)
+        .filter(([_key, val]) => val === "")
+        .map(([key, val]) => console.error(`invalid input ${key}:${val}`));
+
+      return;
+    }
+    if (!isDateValid) {
+      console.error("invalid date type");
       return;
     }
     if ("amount" in form) {
       if (form.amount <= 0) {
-        console.error("invalid input");
+        console.error("invalid input :amount must be a positive integer ");
         return;
       }
     }
     setForm({ ...form, uuid: crypto.randomUUID() }); // uuid付けるのはrustにお願いしていいのでは？
-    console.log(await invoke(`save_expence`, { expence: form }));
+    try {
+      let message = await invoke(`save_${saveType}`, { [saveType]: form });
+      console.log(message);
+      setForm(initForm);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const createDateForm = () => {
@@ -145,13 +156,15 @@ const FormForSaveNewRecord = ({ saveType }: { saveType: SaveType }) => {
               <label htmlFor={key}>{key}</label>
               <input
                 id={key}
-                type={key === "amount" ? "number" : "text"}
+                type={
+                  key === "amount" || key === "commission" ? "number" : "text"
+                }
                 value={value}
                 onChange={(e) =>
                   setForm({
                     ...form,
                     [key]:
-                      key === "amount"
+                      key === "amount" || key === "commission"
                         ? parseInt(e.target.value)
                         : e.target.value,
                   })

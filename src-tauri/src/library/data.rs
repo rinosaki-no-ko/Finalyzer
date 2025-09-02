@@ -27,8 +27,8 @@ pub struct Transfer {
     pub date: String,
     pub from_account: String,
     pub to_account: String,
-    pub from_amount: u32,
-    pub to_amount: u32,
+    pub amount: u32,
+    pub commission: u32,
     pub description: String,
     pub uuid: String,
 }

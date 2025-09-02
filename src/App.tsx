@@ -1,53 +1,37 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
+import { useState, useEffect } from "react";
 import "./App.css";
-import SaveNewRecord from "./features/SaveNewRecord/SaveNewRecord";
+import SaveNewRecords from "./features/SaveNewRecords/SaveNewRecords";
+import { invoke } from "@tauri-apps/api/core";
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+const App = () => {
+  const [feature, setFeature] = useState("SaveNewRecord");
+  const [appVersion, setAppVersion] = useState("");
+  useEffect(() => {
+    invoke("get_app_version").then((val) => setAppVersion(val as string));
+  }, []);
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
-
+  const showFeature = () => {
+    if (feature === "SaveNewRecord") {
+      return <SaveNewRecords></SaveNewRecords>;
+    }
+  };
   return (
     <main className="container">
-      {/* <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>main</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
+      <h1>Finalyzer {appVersion}</h1>
+      <select
+        name=""
+        id=""
+        defaultValue={"SaveNewRecord"}
+        onChange={(ev: React.ChangeEvent<HTMLSelectElement>) => {
+          setFeature(ev.currentTarget.value);
         }}
       >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">G</button>
-      </form>
-      <p>{greetMsg}</p> */}
-      <SaveNewRecord></SaveNewRecord>
+        <option value="SaveNewRecord">新規記録</option>
+        <option value="ViewRecord">記録確認</option>
+      </select>
+      {showFeature()}
     </main>
   );
-}
+};
 
 export default App;

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import FormForSaveNewRecord from "./FormForSaveNewRecord";
+import FormForSaveNewRecords from "./FormForSaveNewRecords";
 
 type SaveType = "expence" | "income" | "transfer";
-const SaveNewRecord = () => {
+const SaveNewRecords = () => {
   const [saveType, setSaveType]: [
     SaveType,
     React.Dispatch<React.SetStateAction<SaveType>>
@@ -22,9 +22,9 @@ const SaveNewRecord = () => {
         <option value="income">収入</option>
         <option value="transfer">振替</option>
       </select>
-      <FormForSaveNewRecord saveType={saveType}></FormForSaveNewRecord>
+      <FormForSaveNewRecords saveType={saveType}></FormForSaveNewRecords>
     </>
   );
 };
 
-export default SaveNewRecord;
+export default SaveNewRecords;

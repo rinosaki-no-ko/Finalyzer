@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import isValidDate from "../../utils/isValidDate";
 
 type SaveType = "expence" | "income" | "transfer";
-const FormForSaveNewRecord = ({ saveType }: { saveType: SaveType }) => {
+const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
   /*
    *****************************************************
    *変数宣言
@@ -181,4 +181,4 @@ const FormForSaveNewRecord = ({ saveType }: { saveType: SaveType }) => {
     </>
   );
 };
-export default FormForSaveNewRecord;
+export default FormForSaveNewRecords;

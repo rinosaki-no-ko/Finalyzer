@@ -8,6 +8,7 @@ pub fn run() {
             library::save_new_records::save_expence,
             library::save_new_records::save_income,
             library::save_new_records::save_transfer,
+            library::utils::get_app_version,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

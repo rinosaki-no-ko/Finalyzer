@@ -27,7 +27,7 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
       description: "",
       account: "",
       member: "",
-      uuid: crypto.randomUUID(),
+      uuid: "X",
     } as Expence;
   } else if (saveType === "income") {
     initForm = {
@@ -37,7 +37,7 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
       description: "",
       account: "",
       member: "",
-      uuid: crypto.randomUUID(),
+      uuid: "X",
     } as Income;
   } else {
     initForm = {
@@ -47,7 +47,7 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
       amount: 0,
       commission: 0,
       description: "",
-      uuid: crypto.randomUUID(),
+      uuid: "X",
     } as Transfer;
   }
   const [form, setForm] = useState(initForm);
@@ -84,9 +84,11 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
         return;
       }
     }
-    setForm({ ...form, uuid: crypto.randomUUID() }); // uuid付けるのはrustにお願いしていいのでは？
+
     try {
-      let message = await invoke(`save_${saveType}`, { [saveType]: form });
+      let message = await invoke(`save_${saveType}`, {
+        [saveType]: { ...form, uuid: crypto.randomUUID() },
+      });
       console.log(message);
       setForm(initForm);
     } catch (e) {

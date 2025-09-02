@@ -24,5 +24,6 @@ dist-ssr
 *.sw?
 
 target/
+icons/
 src-tauri/target/
 todo.md

@@ -11,6 +11,7 @@ pub fn run() {
             library::get_records::get_income_records,
             library::get_records::get_expence_records,
             library::get_records::get_transfer_records,
+            library::update_records::update_records,
             library::utils::get_app_version,
         ])
         .run(tauri::generate_context!())

@@ -27,3 +27,5 @@ target/
 icons/
 src-tauri/target/
 todo.md
+commit_history.md
+memo.md

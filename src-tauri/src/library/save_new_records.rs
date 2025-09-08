@@ -109,6 +109,7 @@ fn create_writer(
         // 初期化処理
         let header = match save_type {
             SaveType::Expence | SaveType::Income => &[
+                "record_type",
                 "date",
                 "category",
                 "amount",
@@ -119,11 +120,12 @@ fn create_writer(
             ],
 
             SaveType::Transfer => &[
+                "record_type",
                 "date",
                 "from_account",
                 "to_account",
-                "to_amount",
-                "from_amount",
+                "amount",
+                "commission",
                 "description",
                 "uuid",
             ],

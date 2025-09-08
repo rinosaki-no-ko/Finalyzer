@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Expence {
+    pub record_type: String,
     pub date: u32,
     pub category: String,
     pub amount: u32,
@@ -13,6 +14,7 @@ pub struct Expence {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Income {
+    pub record_type: String,
     pub date: u32,
     pub category: String,
     pub amount: u32,
@@ -24,6 +26,7 @@ pub struct Income {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Transfer {
+    pub record_type: String,
     pub date: u32,
     pub from_account: String,
     pub to_account: String,

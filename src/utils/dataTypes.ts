@@ -1,4 +1,5 @@
 interface Expence {
+  record_type: string;
   date: number;
   category: string;
   amount: number;
@@ -9,6 +10,7 @@ interface Expence {
 }
 
 interface Income {
+  record_type: string;
   date: number;
   category: string;
   amount: number;
@@ -19,6 +21,7 @@ interface Income {
 }
 
 interface Transfer {
+  record_type: string;
   date: number;
   from_account: string;
   to_account: string;

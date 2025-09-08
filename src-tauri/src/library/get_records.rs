@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use tauri::Manager;
 
 #[tauri::command]
-pub fn get_records(app_handle: tauri::AppHandle) -> Result<Vec<Expence>, String> {
+pub fn get_expence_records(app_handle: tauri::AppHandle) -> Result<Vec<Expence>, String> {
     let mut rdr = match create_reader(app_handle, SaveType::Expence) {
         Ok(rdr) => rdr,
         Err(ReaderErrors::NotExist) => return Ok(Vec::new()),
@@ -14,6 +14,43 @@ pub fn get_records(app_handle: tauri::AppHandle) -> Result<Vec<Expence>, String>
 
     let mut records = Vec::<Expence>::new();
     for result in rdr.deserialize::<Expence>() {
+        let record = match result {
+            Ok(record) => record,
+            Err(e) => return Err(e.to_string()),
+        };
+        records.push(record)
+    }
+    Ok(records)
+}
+
+#[tauri::command]
+pub fn get_income_records(app_handle: tauri::AppHandle) -> Result<Vec<Income>, String> {
+    let mut rdr = match create_reader(app_handle, SaveType::Income) {
+        Ok(rdr) => rdr,
+        Err(ReaderErrors::NotExist) => return Ok(Vec::new()),
+        Err(ReaderErrors::Other(e)) => return Err(e),
+    };
+
+    let mut records = Vec::<Income>::new();
+    for result in rdr.deserialize::<Income>() {
+        let record = match result {
+            Ok(record) => record,
+            Err(e) => return Err(e.to_string()),
+        };
+        records.push(record)
+    }
+    Ok(records)
+}
+#[tauri::command]
+pub fn get_transfer_records(app_handle: tauri::AppHandle) -> Result<Vec<Transfer>, String> {
+    let mut rdr = match create_reader(app_handle, SaveType::Transfer) {
+        Ok(rdr) => rdr,
+        Err(ReaderErrors::NotExist) => return Ok(Vec::new()),
+        Err(ReaderErrors::Other(e)) => return Err(e),
+    };
+
+    let mut records = Vec::<Transfer>::new();
+    for result in rdr.deserialize::<Transfer>() {
         let record = match result {
             Ok(record) => record,
             Err(e) => return Err(e.to_string()),

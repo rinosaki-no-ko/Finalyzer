@@ -21,6 +21,7 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
   let initForm: Expence | Income | Transfer;
   if (saveType === "expence") {
     initForm = {
+      record_type: "expence",
       date: date.year * 10000 + date.month * 100 + date.day,
       category: "",
       amount: 0,
@@ -31,6 +32,7 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
     } as Expence;
   } else if (saveType === "income") {
     initForm = {
+      record_type: "income",
       date: date.year * 10000 + date.month * 100 + date.day,
       category: "",
       amount: 0,
@@ -41,6 +43,7 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
     } as Income;
   } else {
     initForm = {
+      record_type: "transfer",
       date: date.year * 10000 + date.month * 100 + date.day,
       from_account: "",
       to_account: "",
@@ -151,7 +154,7 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
       <form>
         {createDateForm()}
         {Object.entries(form).map(([key, value]) => {
-          if (key === "date" || key === "uuid") {
+          if (key === "record_type" || key === "date" || key === "uuid") {
             return;
           }
           return (

@@ -1,39 +1,50 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./App.css";
-import SaveNewRecords from "./features/SaveNewRecords/SaveNewRecords";
-import ViewRecords from "./features/ViewRecords/ViewRecords";
-import { invoke } from "@tauri-apps/api/core";
+import RecordsPage from "./pages/Records/RecordsPage";
+import BudgetPage from "./pages/Budget/BudgetPage";
+import AnalyzePage from "./pages/Analyze/AnalyzePage";
+import ImportPage from "./pages/Import/ImportPage";
+import ExportPage from "./pages/Export/ExportPage";
+import SettingsPage from "./pages/Settings/SettingsPage";
 
 const App = () => {
-  const [feature, setFeature] = useState("SaveNewRecords");
-  const [appVersion, setAppVersion] = useState("");
-  useEffect(() => {
-    invoke("get_app_version").then((val) => setAppVersion(val as string));
-  }, []);
-
-  const showFeature = () => {
-    if (feature === "SaveNewRecords") {
-      return <SaveNewRecords></SaveNewRecords>;
-    } else if (feature === "ViewRecords") {
-      return <ViewRecords></ViewRecords>;
-    }
+  const pages = {
+    records: <RecordsPage />,
+    budget: <BudgetPage />,
+    analyze: <AnalyzePage />,
+    import: <ImportPage />,
+    export: <ExportPage />,
+    settings: <SettingsPage />,
   };
+  const [activePage, setActivePage] = useState("records");
+
   return (
-    <main className="containers">
-      <h1>Finalyzer {appVersion}</h1>
-      <select
-        name=""
-        id=""
-        defaultValue={"SaveNewRecords"}
-        onChange={(ev: React.ChangeEvent<HTMLSelectElement>) => {
-          setFeature(ev.currentTarget.value);
-        }}
-      >
-        <option value="SaveNewRecords">新規記録</option>
-        <option value="ViewRecords">記録確認</option>
-      </select>
-      {showFeature()}
-    </main>
+    <>
+      <header className="header-wrapper">
+        <div className="header-container">{activePage}</div>
+      </header>
+
+      <nav className="page-nav-wrapper">
+        <div className="page-nav-container">
+          {Object.keys(pages).map((page) => {
+            return (
+              <button
+                key={`${page} page`}
+                onClick={() => {
+                  setActivePage(page);
+                }}
+              >
+                {page}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
+      <main className="page-wrapper">
+        {pages[activePage as keyof typeof pages]}
+      </main>
+    </>
   );
 };
 

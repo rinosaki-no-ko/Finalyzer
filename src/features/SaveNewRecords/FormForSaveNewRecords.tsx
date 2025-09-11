@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { Expence, Income, Transfer } from "../../utils/dataTypes";
 import { useEffect, useState } from "react";
-import isValidDate from "../../utils/isValidDate";
+import { isValidDate } from "../../utils/date";
 
 type SaveType = "expence" | "income" | "transfer";
 const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {

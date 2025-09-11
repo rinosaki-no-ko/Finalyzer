@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use tauri::Manager;
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum UpdateAction {
     Update(Record),
     Delete(Record),

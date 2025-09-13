@@ -1,8 +1,13 @@
 import { useState } from "react";
 import FormForSaveNewRecords from "./FormForSaveNewRecords";
+import { HandleOverlay } from "../dataType";
 
 type SaveType = "expence" | "income" | "transfer";
-const SaveNewRecords = () => {
+const SaveNewRecords = ({
+  handleOverlay,
+}: {
+  handleOverlay: HandleOverlay;
+}) => {
   const [saveType, setSaveType]: [
     SaveType,
     React.Dispatch<React.SetStateAction<SaveType>>
@@ -17,6 +22,14 @@ const SaveNewRecords = () => {
   return (
     <>
       <h2>新規記録 保存形式：{saveType}</h2>
+      <button
+        type="button"
+        onClick={() => {
+          handleOverlay("close");
+        }}
+      >
+        cancel
+      </button>
       <select name="" id="" onChange={changeType} defaultValue={"expence"}>
         <option value="expence">出費</option>
         <option value="income">収入</option>

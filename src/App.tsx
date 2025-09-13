@@ -21,7 +21,7 @@ const App = () => {
   return (
     <>
       <header className="header-wrapper">
-        <div className="header-container">{activePage}</div>
+        <div className="header-container"></div>
       </header>
 
       <nav className="page-nav-wrapper">
@@ -29,6 +29,7 @@ const App = () => {
           {Object.keys(pages).map((page) => {
             return (
               <button
+                type="button"
                 key={`${page} page`}
                 onClick={() => {
                   setActivePage(page);

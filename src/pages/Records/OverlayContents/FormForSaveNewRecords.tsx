@@ -1,7 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Expence, Income, Transfer } from "../../utils/dataTypes";
+import { Expence, Income, Transfer } from "../../../utils/dataTypes";
 import { useEffect, useState } from "react";
-import { isValidDate } from "../../utils/date";
+import { isValidDate } from "../../../utils/date";
+import { Record } from "../../../utils/dataTypes";
 
 type SaveType = "expence" | "income" | "transfer";
 const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
@@ -18,7 +19,7 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
   });
   const [isDateValid, setIsDateValid] = useState(true);
 
-  let initForm: Expence | Income | Transfer;
+  let initForm: Record;
   if (saveType === "expence") {
     initForm = {
       record_type: "expence",
@@ -60,7 +61,7 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
   }, [saveType]);
 
   useEffect(() => {
-    setIsDateValid(isValidDate(date));
+    setIsDateValid(isValidDate(date.year, date.month, date.year));
     setForm({
       ...form,
       date: date.year * 10000 + date.month * 100 + date.day,
@@ -179,11 +180,11 @@ const FormForSaveNewRecords = ({ saveType }: { saveType: SaveType }) => {
               />
             </div>
           );
-        })}
+        })}{" "}
+        <button type="button" onClick={save}>
+          Submit!
+        </button>
       </form>
-      <button type="submit" onClick={save}>
-        Submit!
-      </button>
     </>
   );
 };

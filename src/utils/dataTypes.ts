@@ -36,12 +36,15 @@ type Record = Expence | Income | Transfer;
 function IsExpence(maybeExpence: Record): maybeExpence is Expence {
   return maybeExpence.record_type === "expence";
 }
+
 function IsIncome(maybeIncome: Record): maybeIncome is Income {
   return maybeIncome.record_type === "income";
 }
+
 function IsTransfer(maybeTransfer: Record): maybeTransfer is Transfer {
   return maybeTransfer.record_type === "transfer";
 }
+
 export {
   type Expence,
   type Income,

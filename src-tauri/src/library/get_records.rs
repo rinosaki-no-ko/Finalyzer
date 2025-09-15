@@ -1,60 +1,51 @@
 use crate::library::data::{Expence, Income, Transfer};
+use crate::library::error::AppError;
 use csv::{Reader, ReaderBuilder};
 use std::fs::{File, OpenOptions};
 use std::path::PathBuf;
-use tauri::Manager;
-
+use tauri::{App, Manager};
 #[tauri::command]
-pub fn get_expence_records(app_handle: tauri::AppHandle) -> Result<Vec<Expence>, String> {
+pub fn get_expence_records(app_handle: tauri::AppHandle) -> Result<Vec<Expence>, AppError> {
     let mut rdr = match create_reader(app_handle, SaveType::Expence) {
         Ok(rdr) => rdr,
         Err(ReaderErrors::NotExist) => return Ok(Vec::new()),
-        Err(ReaderErrors::Other(e)) => return Err(e),
+        Err(ReaderErrors::Other(e)) => return Err(AppError::FileIO(e.to_string())),
     };
 
     let mut records = Vec::<Expence>::new();
     for result in rdr.deserialize::<Expence>() {
-        let record = match result {
-            Ok(record) => record,
-            Err(e) => return Err(e.to_string()),
-        };
+        let record = result.map_err(|e| AppError::CsvParse(e.to_string()))?;
         records.push(record)
     }
     Ok(records)
 }
 
 #[tauri::command]
-pub fn get_income_records(app_handle: tauri::AppHandle) -> Result<Vec<Income>, String> {
+pub fn get_income_records(app_handle: tauri::AppHandle) -> Result<Vec<Income>, AppError> {
     let mut rdr = match create_reader(app_handle, SaveType::Income) {
         Ok(rdr) => rdr,
         Err(ReaderErrors::NotExist) => return Ok(Vec::new()),
-        Err(ReaderErrors::Other(e)) => return Err(e),
+        Err(ReaderErrors::Other(e)) => return Err(AppError::FileIO(e.to_string())),
     };
 
     let mut records = Vec::<Income>::new();
     for result in rdr.deserialize::<Income>() {
-        let record = match result {
-            Ok(record) => record,
-            Err(e) => return Err(e.to_string()),
-        };
+        let record = result.map_err(|e| AppError::CsvParse(e.to_string()))?;
         records.push(record)
     }
     Ok(records)
 }
 #[tauri::command]
-pub fn get_transfer_records(app_handle: tauri::AppHandle) -> Result<Vec<Transfer>, String> {
+pub fn get_transfer_records(app_handle: tauri::AppHandle) -> Result<Vec<Transfer>, AppError> {
     let mut rdr = match create_reader(app_handle, SaveType::Transfer) {
         Ok(rdr) => rdr,
         Err(ReaderErrors::NotExist) => return Ok(Vec::new()),
-        Err(ReaderErrors::Other(e)) => return Err(e),
+        Err(ReaderErrors::Other(e)) => return Err(AppError::FileIO(e.to_string())),
     };
 
     let mut records = Vec::<Transfer>::new();
     for result in rdr.deserialize::<Transfer>() {
-        let record = match result {
-            Ok(record) => record,
-            Err(e) => return Err(e.to_string()),
-        };
+        let record = result.map_err(|e| AppError::CsvParse(e.to_string()))?;
         records.push(record)
     }
     Ok(records)
@@ -92,7 +83,7 @@ fn create_reader(
 
     let file = match OpenOptions::new().read(true).open(&file_path) {
         Ok(file) => file,
-        Err(e) => return Err(ReaderErrors::Other(format!("failed to open file:{}", e))),
+        Err(e) => return Err(ReaderErrors::Other(e.to_string())),
     };
 
     let rdr = ReaderBuilder::new().has_headers(true).from_reader(file);

@@ -1,61 +1,44 @@
 use crate::library::data::{Expence, Income, Transfer};
+use crate::library::error::AppError;
 use csv::{Writer, WriterBuilder};
 use std::fs::{File, OpenOptions};
 use std::path::PathBuf;
-use tauri::Manager;
+use tauri::{App, Manager};
 
 #[tauri::command]
-pub fn save_expence(app_handle: tauri::AppHandle, expence: Expence) -> Result<String, String> {
-    let mut wtr = match create_writer(app_handle, SaveType::Expence) {
-        Ok(wtr) => wtr,
-        Err(e) => return Err(format!("Error occured : {}", e)),
-    };
+pub fn save_expence(app_handle: tauri::AppHandle, expence: Expence) -> Result<(), AppError> {
+    let mut wtr = create_writer(app_handle, SaveType::Expence)?;
 
-    if let Err(e) = wtr.serialize(expence) {
-        return Err(format!("Failed to write to CSV: {}", e));
-    }
+    wtr.serialize(expence)
+        .map_err(|e| AppError::CsvWrite(e.to_string()))?;
 
-    if let Err(e) = wtr.flush() {
-        return Err(format!("failed to flush writer: {}", e));
-    }
+    wtr.flush().map_err(|e| AppError::CsvWrite(e.to_string()))?;
 
-    Ok("Expence saved successfully!".to_string())
+    Ok(())
 }
 
 #[tauri::command]
-pub fn save_income(app_handle: tauri::AppHandle, income: Income) -> Result<String, String> {
-    let mut wtr = match create_writer(app_handle, SaveType::Income) {
-        Ok(wtr) => wtr,
-        Err(e) => return Err(format!("Error occured : {}", e)),
-    };
+pub fn save_income(app_handle: tauri::AppHandle, income: Income) -> Result<(), AppError> {
+    let mut wtr = create_writer(app_handle, SaveType::Income)?;
 
-    if let Err(e) = wtr.serialize(income) {
-        return Err(format!("Failed to write to CSV: {}", e));
-    }
+    wtr.serialize(income)
+        .map_err(|e| AppError::CsvWrite(e.to_string()))?;
 
-    if let Err(e) = wtr.flush() {
-        return Err(format!("failed to flush writer: {}", e));
-    }
+    wtr.flush().map_err(|e| AppError::CsvWrite(e.to_string()))?;
 
-    Ok("Income saved successfully!".to_string())
+    Ok(())
 }
 
 #[tauri::command]
-pub fn save_transfer(app_handle: tauri::AppHandle, transfer: Transfer) -> Result<String, String> {
-    let mut wtr = match create_writer(app_handle, SaveType::Transfer) {
-        Ok(wtr) => wtr,
-        Err(e) => return Err(format!("Error occured : {}", e)),
-    };
+pub fn save_transfer(app_handle: tauri::AppHandle, transfer: Transfer) -> Result<(), AppError> {
+    let mut wtr = create_writer(app_handle, SaveType::Transfer)?;
 
-    if let Err(e) = wtr.serialize(transfer) {
-        return Err(format!("Failed to write to CSV: {}", e));
-    }
+    wtr.serialize(transfer)
+        .map_err(|e| AppError::CsvWrite(e.to_string()))?;
 
-    if let Err(e) = wtr.flush() {
-        return Err(format!("failed to flush writer: {}", e));
-    }
+    wtr.flush().map_err(|e| AppError::CsvWrite(e.to_string()))?;
 
-    Ok("Transfers saved successfully!".to_string())
+    Ok(())
 }
 
 enum SaveType {
@@ -67,12 +50,12 @@ enum SaveType {
 fn create_writer(
     app_handle: tauri::AppHandle,
     save_type: SaveType,
-) -> Result<Writer<File>, String> {
+) -> Result<Writer<File>, AppError> {
     // OSに応じてアプリデータを格納する最適なディレクトリを探す。
-    let app_data_path: PathBuf = match app_handle.path().app_data_dir()        /*finalyzerディレクトリがなければ作成する。あれば何もしない。冪等性（べきとうせい）のある操作*/ {
-        Ok(path) => path,
-        Err(e) => return Err(e.to_string()),
-    };
+    let app_data_path: PathBuf = app_handle
+        .path()
+        .app_data_dir()
+        .map_err(|e| AppError::Tauri(e.to_string()))?; /*finalyzerディレクトリがなければ作成する。あれば何もしない。冪等性（べきとうせい）のある操作*/
 
     // アプリデータを格納するディレクトリ内のexpences.csvファイルを持ってくる。
     let file_name = match save_type {
@@ -84,24 +67,19 @@ fn create_writer(
 
     // 初回起動時、アプリデータディレクトリにfinalyzer用のディレクトリを作成する。
     if let Some(parent) = file_path.parent() {
-        if let Err(e) = std::fs::create_dir_all(parent) {
-            return Err(format!("Failed to create parent directories: {}", e));
-        }
+        std::fs::create_dir_all(parent).map_err(|e| AppError::CreateDir(e.to_string()))?
     }
 
     // 新規作成か否かを判定
     let file_exists = file_path.exists();
 
     // ファイルを開いていくよ。
-    let file = match OpenOptions::new()
+    let file = OpenOptions::new()
         // .write(true)
         .append(true)
         .create(true)
         .open(&file_path)
-    {
-        Ok(file) => file,
-        Err(e) => return Err(format!("failed to open file:{}", e)),
-    };
+        .map_err(|e| AppError::FileIO(e.to_string()))?;
 
     let mut wtr = WriterBuilder::new().has_headers(false).from_writer(file);
 
@@ -131,13 +109,10 @@ fn create_writer(
             ],
         };
 
-        if let Err(e) = wtr.write_record(header) {
-            return Err(format!("Failed to create new CSV: {}", e));
-        }
+        wtr.write_record(header)
+            .map_err(|e| AppError::CsvWrite(e.to_string()))?;
 
-        if let Err(e) = wtr.flush() {
-            return Err(format!("failed to create new CSV: {}", e));
-        }
+        wtr.flush().map_err(|e| AppError::CsvWrite(e.to_string()))?;
     }
 
     Ok(wtr)

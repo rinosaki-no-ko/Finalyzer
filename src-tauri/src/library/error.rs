@@ -18,6 +18,15 @@ pub enum AppError {
 
     #[error("Failed to write JSON data: {0}")]
     JsonWrite(String),
+
+    #[error("Failed to parse CSV data: {0}")]
+    CsvParse(String),
+
+    #[error("Failed to write CSV data: {0}")]
+    CsvWrite(String),
+
+    #[error("UUID error: {0}")]
+    Uuid(String),
 }
 
 // 以下で既存のエラーをAppErrorに自動変換する静的メソッドを追加！これにより?演算子が使用可能に！！

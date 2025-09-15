@@ -3,7 +3,10 @@ use std::{
     path::PathBuf,
 };
 
-use crate::library::data::{Expence, HasCommonField, Income, Record, Transfer};
+use crate::library::{
+    data::{Expence, HasCommonField, Income, Record, Transfer},
+    error::AppError,
+};
 use csv::{ReaderBuilder, WriterBuilder};
 use serde::{Deserialize, Serialize};
 use tauri::Manager;
@@ -19,23 +22,23 @@ pub enum UpdateAction {
 pub fn update_records(
     app_handle: tauri::AppHandle,
     update_action: UpdateAction,
-) -> Result<(), String> {
+) -> Result<(), AppError> {
     match update_action {
         UpdateAction::Update(new_record) => process_update(app_handle, new_record),
         UpdateAction::Delete(target_record) => process_delete(app_handle, target_record),
     }
 }
 
-fn process_update(app_handle: tauri::AppHandle, record: Record) -> Result<(), String> {
+fn process_update(app_handle: tauri::AppHandle, record: Record) -> Result<(), AppError> {
     match record {
         Record::Expence(exp_record) => {
             let (file_name, new_record) = ("expences", exp_record);
             let file_path = get_file_path(app_handle, file_name)?;
 
-            let file = match OpenOptions::new().read(true).open(&file_path) {
-                Ok(file) => file,
-                Err(e) => return Err(format!("failed to open file:{}", e)),
-            };
+            let file = OpenOptions::new()
+                .read(true)
+                .open(&file_path)
+                .map_err(|e| AppError::FileIO(e.to_string()))?;
 
             let current_records = deserialize_current_csv::<Expence>(file)?;
             let updated_records = create_updated_records::<Expence>(current_records, new_record)?;
@@ -47,10 +50,10 @@ fn process_update(app_handle: tauri::AppHandle, record: Record) -> Result<(), St
             let (file_name, new_record) = ("incomes", inc_record);
             let file_path = get_file_path(app_handle, file_name)?;
 
-            let file = match OpenOptions::new().read(true).open(&file_path) {
-                Ok(file) => file,
-                Err(e) => return Err(format!("failed to open file:{}", e)),
-            };
+            let file = OpenOptions::new()
+                .read(true)
+                .open(&file_path)
+                .map_err(|e| AppError::FileIO(e.to_string()))?;
 
             let current_records = deserialize_current_csv::<Income>(file)?;
             let updated_records = create_updated_records::<Income>(current_records, new_record)?;
@@ -62,10 +65,10 @@ fn process_update(app_handle: tauri::AppHandle, record: Record) -> Result<(), St
             let (file_name, new_record) = ("transfers", trf_record);
             let file_path = get_file_path(app_handle, file_name)?;
 
-            let file = match OpenOptions::new().read(true).open(&file_path) {
-                Ok(file) => file,
-                Err(e) => return Err(format!("failed to open file:{}", e)),
-            };
+            let file = OpenOptions::new()
+                .read(true)
+                .open(&file_path)
+                .map_err(|e| AppError::FileIO(e.to_string()))?;
 
             let current_records = deserialize_current_csv::<Transfer>(file)?;
             let updated_records = create_updated_records::<Transfer>(current_records, new_record)?;
@@ -76,16 +79,16 @@ fn process_update(app_handle: tauri::AppHandle, record: Record) -> Result<(), St
     }
 }
 
-fn process_delete(app_handle: tauri::AppHandle, record: Record) -> Result<(), String> {
+fn process_delete(app_handle: tauri::AppHandle, record: Record) -> Result<(), AppError> {
     match record {
         Record::Expence(exp_record) => {
             let (file_name, new_record) = ("expences", exp_record);
             let file_path = get_file_path(app_handle, file_name)?;
 
-            let file = match OpenOptions::new().read(true).open(&file_path) {
-                Ok(file) => file,
-                Err(e) => return Err(format!("failed to open file:{}", e)),
-            };
+            let file = OpenOptions::new()
+                .read(true)
+                .open(&file_path)
+                .map_err(|e| AppError::FileIO(e.to_string()))?;
 
             let current_records = deserialize_current_csv::<Expence>(file)?;
             let updated_records = create_deleted_records::<Expence>(current_records, new_record)?;
@@ -96,11 +99,10 @@ fn process_delete(app_handle: tauri::AppHandle, record: Record) -> Result<(), St
         Record::Income(inc_record) => {
             let (file_name, new_record) = ("incomes", inc_record);
             let file_path = get_file_path(app_handle, file_name)?;
-
-            let file = match OpenOptions::new().read(true).open(&file_path) {
-                Ok(file) => file,
-                Err(e) => return Err(format!("failed to open file:{}", e)),
-            };
+            let file = OpenOptions::new()
+                .read(true)
+                .open(&file_path)
+                .map_err(|e| AppError::FileIO(e.to_string()))?;
 
             let current_records = deserialize_current_csv::<Income>(file)?;
             let updated_records = create_deleted_records::<Income>(current_records, new_record)?;
@@ -112,10 +114,10 @@ fn process_delete(app_handle: tauri::AppHandle, record: Record) -> Result<(), St
             let (file_name, new_record) = ("transfers", trf_record);
             let file_path = get_file_path(app_handle, file_name)?;
 
-            let file = match OpenOptions::new().read(true).open(&file_path) {
-                Ok(file) => file,
-                Err(e) => return Err(format!("failed to open file:{}", e)),
-            };
+            let file = OpenOptions::new()
+                .read(true)
+                .open(&file_path)
+                .map_err(|e| AppError::FileIO(e.to_string()))?;
 
             let current_records = deserialize_current_csv::<Transfer>(file)?;
             let updated_records = create_deleted_records::<Transfer>(current_records, new_record)?;
@@ -126,18 +128,18 @@ fn process_delete(app_handle: tauri::AppHandle, record: Record) -> Result<(), St
     }
 }
 
-fn get_file_path(app_handle: tauri::AppHandle, file_name: &str) -> Result<PathBuf, String> {
-    let app_data_path: PathBuf = match app_handle.path().app_data_dir() {
-        Ok(path) => path,
-        Err(e) => return Err(e.to_string()),
-    };
+fn get_file_path(app_handle: tauri::AppHandle, file_name: &str) -> Result<PathBuf, AppError> {
+    let app_data_path: PathBuf = app_handle
+        .path()
+        .app_data_dir()
+        .map_err(|e| AppError::Tauri(e.to_string()))?;
 
     let file_path = app_data_path.join(format!("{}.csv", file_name));
 
     Ok(file_path)
 }
 
-fn deserialize_current_csv<T>(file: File) -> Result<Vec<T>, String>
+fn deserialize_current_csv<T>(file: File) -> Result<Vec<T>, AppError>
 where
     T: for<'de> Deserialize<'de> + Serialize + HasCommonField + std::fmt::Debug + Clone,
 {
@@ -146,17 +148,15 @@ where
     let mut records = Vec::<T>::new();
 
     for record in reader.deserialize::<T>() {
-        let record = match record {
-            Ok(record) => record,
-            Err(e) => return Err(format!("failed to deserialize CSV :{}", e)),
-        };
+        let record = record.map_err(|e| AppError::CsvParse(e.to_string()))?;
+
         records.push(record)
     }
 
     Ok(records)
 }
 
-fn create_updated_records<T>(mut records: Vec<T>, new_record: T) -> Result<Vec<T>, String>
+fn create_updated_records<T>(mut records: Vec<T>, new_record: T) -> Result<Vec<T>, AppError>
 where
     T: for<'de> Deserialize<'de> + Serialize + HasCommonField + std::fmt::Debug + Clone,
 {
@@ -170,14 +170,14 @@ where
     }
 
     if !found {
-        return Err(format!(
-            "record with uuid {} not found",
-            new_record.get_uuid()
-        ));
+        return Err(AppError::Uuid(format!(
+            "Record with UUID {} not found",
+            new_record.get_uuid(),
+        )));
     }
     Ok(records)
 }
-fn create_deleted_records<T>(mut records: Vec<T>, new_record: T) -> Result<Vec<T>, String>
+fn create_deleted_records<T>(mut records: Vec<T>, new_record: T) -> Result<Vec<T>, AppError>
 where
     T: for<'de> Deserialize<'de> + Serialize + HasCommonField + std::fmt::Debug + Clone,
 {
@@ -186,27 +186,24 @@ where
     records.retain(|record| record.get_uuid() != new_record.get_uuid());
 
     if initial_len == records.len() {
-        return Err(format!(
+        return Err(AppError::Uuid(format!(
             "Record with UUID {} not found",
-            new_record.get_uuid()
-        ));
+            new_record.get_uuid(),
+        )));
     }
 
     Ok(records)
 }
 
-fn write_updated_records<T>(file_path: &PathBuf, updated_records: Vec<T>) -> Result<(), String>
+fn write_updated_records<T>(file_path: &PathBuf, updated_records: Vec<T>) -> Result<(), AppError>
 where
     T: for<'de> Deserialize<'de> + Serialize + HasCommonField + std::fmt::Debug + Clone,
 {
-    let file = match OpenOptions::new()
+    let file = OpenOptions::new()
         .write(true)
         .truncate(true) // 既存ファイルを破棄、空ファイルにする
         .open(file_path)
-    {
-        Ok(file) => file,
-        Err(e) => return Err(format!("Failed to open file for writing: {}", e)),
-    };
+        .map_err(|e| AppError::FileIO(e.to_string()))?;
 
     let mut writer = WriterBuilder::new().from_writer(file);
 
@@ -214,10 +211,10 @@ where
     for record in updated_records.iter() {
         writer
             .serialize(record)
-            .map_err(|e| format!("Failed to serialize record: {}", e))?;
+            .map_err(|e| AppError::CsvWrite(e.to_string()))?;
     }
     writer
         .flush()
-        .map_err(|e| format!("Failed to flush writer: {}", e))?;
+        .map_err(|e| AppError::CsvWrite(e.to_string()))?;
     Ok(())
 }

@@ -69,7 +69,7 @@ fn create_writer(
     save_type: SaveType,
 ) -> Result<Writer<File>, String> {
     // OSに応じてアプリデータを格納する最適なディレクトリを探す。
-    let app_data_path: PathBuf = match app_handle.path().app_data_dir() {
+    let app_data_path: PathBuf = match app_handle.path().app_data_dir()        /*finalyzerディレクトリがなければ作成する。あれば何もしない。冪等性（べきとうせい）のある操作*/ {
         Ok(path) => path,
         Err(e) => return Err(e.to_string()),
     };

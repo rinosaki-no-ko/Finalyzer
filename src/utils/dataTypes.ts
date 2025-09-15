@@ -45,6 +45,12 @@ function IsTransfer(maybeTransfer: Record): maybeTransfer is Transfer {
   return maybeTransfer.record_type === "transfer";
 }
 
+interface AppSettings {
+  categoryes: string[];
+  accounts: string[];
+  member: string[];
+}
+
 export {
   type Expence,
   type Income,
@@ -53,4 +59,5 @@ export {
   IsExpence,
   IsIncome,
   IsTransfer,
+  type AppSettings,
 };
